@@ -65,7 +65,7 @@ void setup()
   result1 = dxl_wb.ping(dxl_id1, &model_number, &log1);
   if (result1 == false)
   {
-    Serial.println(log);
+    Serial.println(log1);
     Serial.println("Failed to ping");
   }
   else
@@ -142,10 +142,10 @@ void setup()
     for (int count = 0; count < 3; count++)
     {
       dxl_wb.goalPosition(dxl_id2, (int32_t)0);
-      delay(3000);
+      delay(4000);
 
       dxl_wb.goalPosition(dxl_id2, (int32_t)1023);
-      delay(3000);
+      delay(4000);
     }
   }
 
