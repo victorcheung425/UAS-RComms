@@ -33,19 +33,16 @@ DynamixelWorkbench dxl_wb;
 
 void setup() 
 {
-  Serial.begin(57600);
+  Serial.begin(BAUDRATE);
   // while(!Serial); // Wait for Opening Serial Monitor
 
   const char *log1;
   const char *log2;
-  const char *log3;
   bool result1 = false;
   bool result2 = false;
-  bool result3 = false;
 
   uint8_t dxl_id1 = DXL_ID1;
   uint8_t dxl_id2 = DXL_ID2;
-  uint8_t dxl_id3 = DXL_ID3;
 
   uint16_t model_number = 0;
 
@@ -129,10 +126,11 @@ void setup()
   }
 
   result2 = dxl_wb.jointMode(dxl_id2, 0, 0, &log2);
-  if (result2 == false)
+  if (result2 == false || result1 == false)
   {
     Serial.println(log2);
-    Serial.println("Failed to change joint mode");
+    Serial.println(log1);
+    Serial.println("Failed to change joint mode for either 1 or 2");
   }
   else
   {
@@ -141,63 +139,18 @@ void setup()
 
     for (int count = 0; count < 3; count++)
     {
+      dxl_wb.goalPosition(dxl_id1, (int32_t)0);
       dxl_wb.goalPosition(dxl_id2, (int32_t)0);
-      delay(4000);
 
+      delay(3000);
+
+      dxl_wb.goalPosition(dxl_id1, (int32_t)1023);
       dxl_wb.goalPosition(dxl_id2, (int32_t)1023);
-      delay(4000);
+
+      delay(2000);
     }
   }
 
-  /* motor id 3 */
-  
-  result3 = dxl_wb.init(DEVICE_NAME, BAUDRATE, &log3);
-  if (result3 == false)
-  {
-    Serial.println(log3);
-    Serial.println("Failed to init");
-  }
-  else
-  {
-    Serial.print("Succeeded to init : ");
-    Serial.println(BAUDRATE);  
-  }
-
-  result3 = dxl_wb.ping(dxl_id3, &model_number, &log3);
-  if (result3 == false)
-  {
-    Serial.println(log3);
-    Serial.println("Failed to ping");
-  }
-  else
-  {
-    Serial.println("Succeeded to ping");
-    Serial.print("id : ");
-    Serial.print(dxl_id3);
-    Serial.print(" model_number : ");
-    Serial.println(model_number);
-  }
-
-  result3 = dxl_wb.jointMode(dxl_id3, 0, 0, &log3);
-  if (result3 == false)
-  {
-    Serial.println(log3);
-    Serial.println("Failed to change joint mode");
-  }
-  else
-  {
-    Serial.println("Succeed to change joint mode");
-    Serial.println("Dynamixel is moving...");
-
-    for (int count = 0; count < 3; count++)
-    {
-      dxl_wb.goalPosition(dxl_id3, (int32_t)0);
-      delay(3000);
-
-      dxl_wb.goalPosition(dxl_id3, (int32_t)1023);
-      delay(3000);
-    }
-  }
 }
 
 void loop() 
