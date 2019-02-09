@@ -75,7 +75,7 @@ void setup()
   }
 
   result1 = dxl_wb.jointMode(dxl_id1, 0, 0, &log1);
-  if (result1 == false)
+ /* if (result1 == false)
   {
     Serial.println(log1);
     Serial.println("Failed to change joint mode");
@@ -94,7 +94,7 @@ void setup()
       delay(3000);
     }
   }
-
+*/
   /* motor id 2 */
 
   
