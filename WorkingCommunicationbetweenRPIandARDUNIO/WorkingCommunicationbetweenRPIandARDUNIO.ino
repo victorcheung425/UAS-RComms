@@ -1,8 +1,9 @@
+
 String inString = "";    // string to hold input
 
 void setup() {
   // Open serial communications and wait for port to open:
-  Serial.begin(9600);
+  Serial.begin(57600);
   pinMode(19, OUTPUT);
 
   while (!Serial) {
@@ -29,6 +30,7 @@ void loop() {
       inString = "";
 
     }
+    
     
   }
 }
