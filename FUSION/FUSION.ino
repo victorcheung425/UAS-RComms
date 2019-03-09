@@ -1,3 +1,4 @@
+
 /*******************************************************************************
 FUSION HAHAHAHAHA
 i hope this works
@@ -68,6 +69,7 @@ void setup() {
     Serial.println(model_number);
   }
 
+//result1 = dxl_wb.setExtendedPositionControlMode(dxl_id1, &log1);
   result1 = dxl_wb.jointMode(dxl_id1, 0, 0, &log1);
   
   
@@ -97,8 +99,8 @@ void setup() {
     Serial.print(" model_number : ");
     Serial.println(model_number);
   }
-
-  result2 = dxl_wb.jointMode(dxl_id2, 0, 0, &log2);
+//result2 = dxl_wb.setExtendedPositionControlMode(dxl_id2, &log2);
+  result2 = dxl_wb.jointMode(dxl_id2,0,0, &log2);
   if (result2 == false || result1 == false)
   {
     Serial.println(log2);
