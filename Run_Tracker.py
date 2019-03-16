@@ -6,13 +6,14 @@ from decimal import *
 from GPS_computation import gps_process
 from ReadGPS import GPS_code
 
-drone_alt = 100
-drone_lat = 49.25
-drone_long = -123
-
 if __name__ == "__main__":
+  #Hardcoded values: Change Later
   mag_angle = 90
+  drone_alt = 100
+  drone_lat = 49.25
+  drone_long = -123 
   ant_alt = 1.5 #height of antenna tracker
+  #Initialization
   ant_gps = GPS_code()
   ant_lat = 49
   ant_long = -123.1
@@ -26,3 +27,5 @@ if __name__ == "__main__":
     (pan,tilt) = gps_process(drone_alt, ant_alt, drone_long, ant_long, drone_lat, ant_lat)
     pan = pan - mag_angle #normalizes pan to zero direction
 #Send command to motors here
+    motor_pan = pan*4095*7/(360*3)
+    motor_tilt = tilt*4095/360
