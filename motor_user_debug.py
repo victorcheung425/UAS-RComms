@@ -25,19 +25,19 @@ while 1 :
         ser.close()
         exit()
     if input == 'init handlers':
-        ser.write('sync_write_handler 1 Goal_Position \r\n'.encode())
-        ser.write('sync_write_handler 2 Goal_PWM \r\n'.encode())
+        ser.write('sync_write_handler 1 Goal_Position \r\n')
+        ser.write('sync_write_handler 2 Goal_PWM \r\n')
     if input == 'init motors':
         ser.write('torque_on 1 \r\n')
         ser.write('torque_on 2 \r\n')
     if input[0:9] == 'move both':
-        ser.write('sync_write 1 2 0 ' + input[10:])
+        ser.write('sync_write 1 2 0 ' + input[10:] + '\r\n')
     if input[0:4] == 'move':
-        ser.write('write ' + input[5] + ' Goal_Position ' + input[7:])
+        ser.write('write ' + input[5] + ' Goal_Position ' + input[7:] + '\r\n')
     if input[0:10] == 'speed both':
-        ser.write('sync_write 1 2 1 ' + input[11:])
+        ser.write('sync_write 1 2 1 ' + input[11:] + '\r\n')
     if input[0:5] == 'speed':
-        ser.write('write ' + input[6] + ' Goal_PWM ' + input[8:])
+        ser.write('write ' + input[6] + ' Goal_PWM ' + input[8:] + '\r\n')
     else:
         ser.write(input + '\r\n')
     out = ''
