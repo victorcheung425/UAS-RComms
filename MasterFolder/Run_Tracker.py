@@ -37,7 +37,6 @@ if __name__ == "__main__":
       (ant_lat_temp,ant_long_temp) = ant_gps.get_gps()
     (ant_lat,ant_long) = (float(ant_lat_temp),float(ant_long_temp))
 
-    
     if (index == 7):
       index = 0
     else:
@@ -46,24 +45,24 @@ if __name__ == "__main__":
     drone_long = drone_long_array[index]
     drone_lat = drone_lat_array[index]
     dynamix.read_serial()
-    time.sleep(1)
+    time.sleep(0.5)
 
     #compute pan/tilt
-	
+
     (new_pan,tilt) = gps_process(drone_alt, ant_alt, drone_long, ant_long, drone_lat, ant_lat)
     new_pan = new_pan - mag_angle #normalizes pan to zero direction
-	
+
     if (new_pan - prev_pan <= -180):
       pan += new_pan - prev_pan + 360
     elif (new_pan - prev_pan >= 180):
       pan += new_pan - prev_pan - 360
     else:
       pan += new_pan - prev_pan
-		
+
     prev_pan = new_pan
-	
+
     #motor control
-    motor_pan = pan*4095/(360)
+    motor_pan = pan*4095/(360)*4 #gear ratio
     motor_tilt = tilt*4095/360
     dynamix.motor_pos(motor_pan,motor_tilt) #set motor position
     print "pan: " + str(motor_pan) + " tilt: " + str(motor_tilt)
