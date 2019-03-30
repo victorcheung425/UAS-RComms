@@ -3,14 +3,18 @@ import serial
 import os
 import time
 from decimal import *
+from __future__ import print_function
+from dronekit import connect, VehicleMode
 
 from GPS_computation import gps_process
 from ReadGPS import GPS_code
 from motor_control import dynamixel_control
+from droneGPS import droneGPS
 
 if __name__ == "__main__":
   #Hardcoded values: Change Later
   mag_angle = 0
+  """
   drone_alt_array = [0, 250, 500, 750, 1000, 750, 500, 250]
   drone_alt = 0
   drone_lat_array = [49.2715, 49.267993, 49.261776, 49.253954, 49.251517, 49.255943, 49.262609, 49.27521]
@@ -18,7 +22,12 @@ if __name__ == "__main__":
   drone_long = -123
   drone_long_array = [-123.243634, -123.233109, -123.228903, -123.232626, -123.247743, -123.259502, -123.266025, -123.257614]
   index = 0;
+  """
   #Initialization
+  drone_gps = droneGPS()
+  drone_lat = 0
+  drone_long = 0
+  drone_alt = 0
   ant_gps = GPS_code()
   ant_lat = 0
   ant_lat_temp = 0
@@ -30,20 +39,17 @@ if __name__ == "__main__":
   pan = 0
   dynamix = dynamixel_control() #motor control instantiation
   dynamix.start_serial() #init serial
-
+  drone_gps.connect_drone() 
+ 
   while True:
     #receive antenna gps
     while(ant_lat_temp == 0):
       (ant_lat_temp,ant_long_temp) = ant_gps.get_gps()
     (ant_lat,ant_long) = (float(ant_lat_temp),float(ant_long_temp))
 
-    if (index == 7):
-      index = 0
-    else:
-      index += 1
-    drone_alt = drone_alt_array[index]
-    drone_long = drone_long_array[index]
-    drone_lat = drone_lat_array[index]
+    #receive drone gps
+    (drone_lat,drone_long,drone_alt) = drone_gps.return_gps_coordinates();
+	
     dynamix.read_serial()
     time.sleep(0.5)
 

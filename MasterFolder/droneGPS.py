@@ -1,4 +1,4 @@
-!/usr/bin/env python
+#/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -18,18 +18,33 @@ import time
 import argparse
 
 class droneGPS:
-    def __init__ (self,lat=0,lon=0,alt=0,connect=0):
+    def __init__ (self,lat=0,lon=0,alt=0,vehicle=0):
         self.lat = lat
-		self.lon = lon
-		self.alt = alt
-		self.vehicle = vehicle
+        self.lon = lon
+        self.alt = alt
+        self.vehicle = vehicle
 
     def connect_drone (self):
-        self.vehicle = connect(connection_string, wait_ready=['gps_0'], baud = 57600, heartbeat_timeout = 60)
-		
-		
+    #self.vehicle = connect(connection_string, wait_ready=['gps_0'], baud = 57600, heartbeat_timeout = 60)
+	self.vehicle = connect('/dev/ttyUSB0', wait_ready=['gps_0'], baud=57600, heartbeat_timeout=60)
+
     def return_gps_coordinates (self):
-		self.lat = vehicle.location.global_relative_frame.lat
-		self.lon = vehicle.location.global_relative_frame.lon
-		self.alt = vehicle.location.global_relative_frame.alt
-		return(self.lat,self.lon,self.alt)
+        self.lat = self.vehicle.location.global_relative_frame.lat
+        self.lon = self.vehicle.location.global_relative_frame.lon
+        self.alt = self.vehicle.location.global_relative_frame.alt
+        return(self.lat,self.lon,self.alt)
+
+"""
+# Code for Testing
+def main():
+    gps = droneGPS()
+    gps.connect_drone()
+    while True:
+        (lat,lon,alt) = gps.return_gps_coordinates()
+        print ("lat = {:10}" .format(lat))
+        print ("lon = {:10}" .format(lon))
+        print ("alt = {:10}" .format(alt))
+
+if __name__ == "__main__":
+    main()
+"""
