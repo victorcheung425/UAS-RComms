@@ -39,7 +39,7 @@ if __name__ == "__main__":
   pan = 0
   dynamix = dynamixel_control() #motor control instantiation
   dynamix.start_serial() #init serial
-  drone_gps.connect_drone() 
+  drone_gps.connect_drone() #connect to drone's RFD
  
   while True:
     #receive antenna gps
@@ -48,13 +48,15 @@ if __name__ == "__main__":
     (ant_lat,ant_long) = (float(ant_lat_temp),float(ant_long_temp))
 
     #receive drone gps
+    if(gps.check_heartbeat()):
+        gps.connect_drone()
     (drone_lat,drone_long,drone_alt) = drone_gps.return_gps_coordinates();
+    (drone_lat,drone_long,drone_alt) = (float(drone_lat),float(drone_long),float(drone_alt))
 	
     dynamix.read_serial()
     time.sleep(0.5)
 
     #compute pan/tilt
-
     (new_pan,tilt) = gps_process(drone_alt, ant_alt, drone_long, ant_long, drone_lat, ant_lat)
     new_pan = new_pan - mag_angle #normalizes pan to zero direction
 
@@ -72,4 +74,3 @@ if __name__ == "__main__":
     motor_tilt = tilt*4095/360
     dynamix.motor_pos(motor_pan,motor_tilt) #set motor position
     print "pan: " + str(motor_pan) + " tilt: " + str(motor_tilt)
-

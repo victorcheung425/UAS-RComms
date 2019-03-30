@@ -1,15 +1,6 @@
 #/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-© Copyright 2015-2016, 3D Robotics.
-vehicle_state.py: 
-
-Demonstrates how to get and set vehicle state and parameter information, 
-and how to observe vehicle attribute (state) changes.
-
-Full documentation is provided at http://python.dronekit.io/examples/vehicle_state.html
-"""
 from __future__ import print_function
 from dronekit import connect, VehicleMode
 import time
@@ -18,21 +9,27 @@ import time
 import argparse
 
 class droneGPS:
-    def __init__ (self,lat=0,lon=0,alt=0,vehicle=0):
-        self.lat = lat
-        self.lon = lon
-        self.alt = alt
+    def __init__ (self,prev_heartbeat=0,vehicle=0):
         self.vehicle = vehicle
+        self.prev_heartbeat = prev_heartbeat
 
     def connect_drone (self):
-    #self.vehicle = connect(connection_string, wait_ready=['gps_0'], baud = 57600, heartbeat_timeout = 60)
-	self.vehicle = connect('/dev/ttyUSB0', wait_ready=['gps_0'], baud=57600, heartbeat_timeout=60)
+        #self.vehicle = connect(connection_string, wait_ready=['gps_0'], baud = 57600, heartbeat_timeout = 60)
+	    self.vehicle = connect('/dev/ttyUSB0', wait_ready=['gps_0'], baud=57600, heartbeat_timeout=60)
+
+    def check_heartbeat(self):
+        if((self.prev_heartbeat != self.vehicle.last_heartbeat) or (self.vehicle.last_heartbeat <= 5)):
+            self.prev_heartbeat = self.vehicle.last_heartbeat
+            reconnect = 0
+        else:
+        	reconnect = 1
+        return reconnect
 
     def return_gps_coordinates (self):
-        self.lat = self.vehicle.location.global_relative_frame.lat
-        self.lon = self.vehicle.location.global_relative_frame.lon
-        self.alt = self.vehicle.location.global_relative_frame.alt
-        return(self.lat,self.lon,self.alt)
+        lat = self.vehicle.location.global_relative_frame.lat
+        lon = self.vehicle.location.global_relative_frame.lon
+        alt = self.vehicle.location.global_relative_frame.alt
+        return(lat,lon,alt)
 
 """
 # Code for Testing
@@ -40,6 +37,8 @@ def main():
     gps = droneGPS()
     gps.connect_drone()
     while True:
+        if(gps.check_heartbeat()):
+            gps.connect_drone()
         (lat,lon,alt) = gps.return_gps_coordinates()
         print ("lat = {:10}" .format(lat))
         print ("lon = {:10}" .format(lon))
