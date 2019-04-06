@@ -3,7 +3,6 @@ import serial
 import os
 import time
 from decimal import *
-from __future__ import print_function
 from dronekit import connect, VehicleMode
 
 from GPS_computation import gps_process
@@ -28,6 +27,9 @@ if __name__ == "__main__":
   drone_lat = 0
   drone_long = 0
   drone_alt = 0
+  drone_lat_temp = 0
+  drone_long_temp = 0
+  drone_alt_temp = 0
   ant_gps = GPS_code()
   ant_lat = 0
   ant_lat_temp = 0
@@ -40,7 +42,7 @@ if __name__ == "__main__":
   dynamix = dynamixel_control() #motor control instantiation
   dynamix.start_serial() #init serial
   drone_gps.connect_drone() #connect to drone's RFD
- 
+
   while True:
     #receive antenna gps
     while(ant_lat_temp == 0):
@@ -48,10 +50,12 @@ if __name__ == "__main__":
     (ant_lat,ant_long) = (float(ant_lat_temp),float(ant_long_temp))
 
     #receive drone gps
-    if(gps.check_heartbeat()):
-        gps.connect_drone()
-    (drone_lat,drone_long,drone_alt) = drone_gps.return_gps_coordinates();
-    (drone_lat,drone_long,drone_alt) = (float(drone_lat),float(drone_long),float(drone_alt))
+    if(drone_gps.check_heartbeat()):
+      drone_gps.connect_drone()
+    while(drone_lat_temp == 0):
+      (drone_lat_temp,drone_long_temp,drone_alt_temp) = drone_gps.return_gps_coordinates();
+    (drone_lat,drone_long,drone_alt) = (float(drone_lat_temp),float(drone_long_temp),float(drone_alt_temp))
+    (drone_lat_temp,drone_long_temp,drone_alt_temp) = (0,0,0)
 	
     dynamix.read_serial()
     time.sleep(0.5)
@@ -70,7 +74,3 @@ if __name__ == "__main__":
     prev_pan = new_pan
 
     #motor control
-    motor_pan = pan*4095/(360)*4 #gear ratio
-    motor_tilt = tilt*4095/360
-    dynamix.motor_pos(motor_pan,motor_tilt) #set motor position
-    print "pan: " + str(motor_pan) + " tilt: " + str(motor_tilt)
