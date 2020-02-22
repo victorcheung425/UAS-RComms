@@ -17,6 +17,7 @@
 /* Authors: Taehun Lim (Darby) */
 
 #include <DynamixelWorkbench.h>
+#include <queue>
 
 #if defined(__OPENCM904__)
   #define DEVICE_NAME "1" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
@@ -26,8 +27,15 @@
 
 #define BAUDRATE  1000000
 #define DXL_ID    2
+#define NVALUES   3000
 
 DynamixelWorkbench dxl_wb;
+
+int phase_calibrate;
+float static_avg;
+float phaseSum;
+float phase_avg;
+std::queue<int> moveAvg;
 
 unsigned int Kalman_filter_for_SEN_1(signed int ADC_Value)
 {
@@ -93,6 +101,9 @@ void setup()
 
   uint8_t dxl_id = DXL_ID;
   uint16_t model_number = 0;
+  phaseSum = 0;
+  phase_calibrate = 0;
+  static_avg = 0;
 
   result = dxl_wb.init(DEVICE_NAME, BAUDRATE, &log);
   if (result == false)
@@ -143,10 +154,20 @@ void setup()
 
     dxl_wb.goalVelocity(dxl_id, (int32_t)0);
   }
+
+  for (int i = 0; i <10000; i++)
+  {
+    phase_calibrate += analogRead(A1)*(3300/1023);
+  }
+
+  static_avg = phase_calibrate/10000;
 }
 
 
 int Direction = 0;
+int32_t previousTime = 0;
+float cumError = 0;
+float lastError = 0;
 
 void loop() {
   const char *log;
@@ -154,23 +175,42 @@ void loop() {
 
   uint8_t dxl_id = DXL_ID;
   uint16_t model_number = 0;
+
+  int32_t currentTime = millis();
+  int elapsedTime = currentTime - previousTime;
+
+  int value = analogRead(A1)*(3300/1023);
+  moveAvg.push(value);
+  phaseSum += value;
+
+  if(moveAvg.size() > NVALUES) {
+    phaseSum -= moveAvg.front();
+    moveAvg.pop();
+  }
+
+  phase_avg = phaseSum/moveAvg.size();
+  //Serial.println(value);
+  Serial.print("Average Phase = ");
+  Serial.print(phase_avg);
+  Serial.print("\t");
+  
   
   int AdcData =
-  Serial.print("A0 = ");
-  Serial.print(analogRead(A0)*(3300/1023));
+  Serial.print("MAG = ");
+  Serial.print(analogRead(A0)*(3300/1023)); //3300mV/10bit, Converting raw ADC to mV
   Serial.print("\t");
 
-  int phase = analogRead(A1)*(3300/1023);
+  int phase = analogRead(A1)*(3300/1023);   //3300mV/10bit, Converting raw ADC to mV
 
-  Serial.print("A1 = ");
+  Serial.print("PHS = ");
   Serial.print(phase);
   Serial.print("\t");
 
   int filtered_phase = Kalman_filter_for_SEN_1(phase);
 
-  Serial.print("FA1 = ");
+  Serial.print("PHS FILTERED = ");
   Serial.print(filtered_phase);
-  Serial.print("\t");
+  Serial.print("\n");
 
   /*
   if (filtered_phase >= 1075)
@@ -186,13 +226,25 @@ void loop() {
     Direction = 0;
   }
 */
-  float P = 0.3;
+  float P = 0.02;
+  float I = 0.00001;
+  float D = 2;
+  float Error = filtered_phase - phase_avg;
+  cumError += Error*elapsedTime;
+  float dErr = (Error - lastError)/elapsedTime;
+  lastError = Error;
   
-  Serial.print(Direction);
+  float MotorOutput = P*Error + I*cumError + D*dErr;
+  Serial.print(MotorOutput);
   Serial.print("\n");
+
+  //Serial.print(Direction);
+  //Serial.print("\n");
   //dxl_wb.goalVelocity(dxl_id, Direction*(30));
 
-  dxl_wb.goalVelocity(dxl_id, P*(filtered_phase - 950));
+  dxl_wb.goalVelocity(dxl_id, MotorOutput);
   
   delay(100);
+  previousTime = currentTime;
+  
 }
